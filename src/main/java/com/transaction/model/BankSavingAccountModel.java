@@ -3,7 +3,7 @@ package com.transaction.model;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "bank_account")
-public class BankAccountModel {
+public class BankSavingAccountModel {
 
 	private Double amount;
 

@@ -5,11 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.transaction.model.TransactionModel;
 
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 @Repository
 public interface TransactionRepositoryInterface extends ReactiveMongoRepository<TransactionModel, String>{
 	
-	Mono<TransactionModel> findByAccountNumber(String accountNumber);
-
+	//Mono<TransactionModel> findByAccountNumber(String accountNumber);
+	Flux<TransactionModel> findByAccountNumber(String accountNumber);
 }

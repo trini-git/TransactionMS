@@ -3,6 +3,7 @@ package com.transaction.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,48 +11,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.transaction.model.BankAccountModel;
+import com.transaction.model.BankSavingAccountModel;
 import com.transaction.model.TransactionModel;
 import com.transaction.service.TransactionService;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/transaction")
-public class TransactionController{
-	
-	BankAccountModel bankAccountModel = new BankAccountModel();
-	
-	WebClient client = WebClient.builder().baseUrl("http://localhost:8007/bank-account")
-			  .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
-	
+public class TransactionController {
+
 	@Autowired
 	TransactionService transactionService;
 	
-	@PostMapping("/insert/{accountNumber}/{typeOperation}/{amount}")
-	public Mono<TransactionModel> insertTransaction(@RequestBody TransactionModel transactionModel, @PathVariable String accountNumber, @PathVariable String typeOperation, @PathVariable Double amount){
+	/*to see all the movements about a account number*/
+	@GetMapping("/get/account-number/{accountNumber}")
+	public Flux<TransactionModel> findByAccountNumber(@PathVariable String accountNumber){
 		
-		if (typeOperation.equalsIgnoreCase("D")) {
-			//bankAccountModel.setAmount(transactionModel.getAmount());
-			updateAmountBankAccount(bankAccountModel,accountNumber,typeOperation,amount).flatMap(dato ->{
-				transactionModel.setAmount(dato.getAmount());
-				return Mono.just(dato);
-				bankAccountModel.setAmount(transactionModel.getAmount());
-			});
-			return transactionService.insertTransaction(transactionModel);
-		}/*else if (typeNumberAccount.equalsIgnoreCase("R")){
-			bankAccountModel.setAmount(transactionModel.getAmount() - amount);
-			updateAmountBankAccount(bankAccountModel,accountNumber).subscribe();
-			return transactionService.insertTransaction(transactionModel);
-		}*/
-		return Mono.just(transactionModel);	
+		return transactionService.findByAccountNumber(accountNumber);
 	}
 	
-	/*Microservice that connects*/
-	public Mono<BankAccountModel> updateAmountBankAccount (
-			BankAccountModel bankAccountModel, String accountNumber, String typeOperation, Double accountNumberAmount){
-		return client.put().uri("/update-amount/"+accountNumber+"/"+typeOperation+"/"+accountNumberAmount).syncBody(bankAccountModel)
-				.retrieve().bodyToMono(BankAccountModel.class);			
+	/*to update the amount depends of Operation Type*/
+	@PostMapping("/insert/{accountNumber}/{typeOperation}/{amount}")
+	public Mono<TransactionModel> insertTransaction(@RequestBody TransactionModel transactionModel,
+			@PathVariable String accountNumber, @PathVariable String typeOperation, @PathVariable Double amount) {
+		
+		return transactionService.insertTransaction(transactionModel,accountNumber,typeOperation,amount);
+		
 	}
-
 }
