@@ -31,13 +31,12 @@ public class TransactionController {
 		
 		return transactionService.findByAccountNumber(accountNumber);
 	}
-	
-	/*to update the amount depends of Operation Type*/
-	@PostMapping("/insert/{accountNumber}/{typeOperation}/{amount}")
-	public Mono<TransactionModel> insertTransaction(@RequestBody TransactionModel transactionModel,
-			@PathVariable String accountNumber, @PathVariable String typeOperation, @PathVariable Double amount) {
 		
-		return transactionService.insertTransaction(transactionModel,accountNumber,typeOperation,amount);
+	/*to update the amount depends of Operation Type*/
+	@PostMapping("/insert")
+	public Mono<TransactionModel> insertTransaction(@RequestBody TransactionModel transactionModel) {
+		
+		return transactionService.insertTransaction(transactionModel);
 		
 	}
 }

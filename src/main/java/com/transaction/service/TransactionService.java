@@ -24,42 +24,56 @@ public class TransactionService implements TransactionServiceInterface {
 	
 	BankSavingAccountModel bankSavingAccountModel = new BankSavingAccountModel();
 	
-	@Override
-	public Mono<TransactionModel> insertTransaction(TransactionModel transactionModel, String accountNumber, String typeOperation, Double amount) {
-		
-		if (typeOperation.equalsIgnoreCase("D")) {
-			
-			bankSavingAccountModel.setAmount(transactionModel.getAmount());
-			updateAmountBankAccount(bankSavingAccountModel, accountNumber, typeOperation, amount).subscribe();
-			return transactionRepositoryInterface.save(transactionModel);
-		} else if (typeOperation.equalsIgnoreCase("R")) {
-			if (bankSavingAccountModel.getAmount() >= transactionModel.getAmount()) {
-				bankSavingAccountModel.setAmount(transactionModel.getAmount());
-				updateAmountBankAccount(bankSavingAccountModel, accountNumber, typeOperation, amount).subscribe();
-				return transactionRepositoryInterface.save(transactionModel);
-			}
-		}
-		return Mono.empty();
-				
-	}
-	
 	/*to see all the movements about a account number*/
 	public Flux<TransactionModel> findByAccountNumber(String accountNumber){
 		
 		return transactionRepositoryInterface.findByAccountNumber(accountNumber);
 		
 	}
-	
+		
+	@Override
+	public Mono<TransactionModel> insertTransaction(TransactionModel transactionModel) {
+		
+		bankSavingAccountModel.setAccountNumber(transactionModel.getAccountNumber());
+		bankSavingAccountModel.setAmount(transactionModel.getAmount());
+		
+		if (transactionModel.getTypeOperation().equalsIgnoreCase("R")) {
+			return updateAmountRetire(bankSavingAccountModel)
+					.flatMap(account -> {
+						return transactionRepositoryInterface.save(transactionModel);
+					});			
+		}else if (transactionModel.getTypeOperation().equalsIgnoreCase("D")) {
+			updateAmountDeposite(bankSavingAccountModel).subscribe();
+			return transactionRepositoryInterface.save(transactionModel);
+		}
+		return Mono.empty();
+		
+	}
+		
 	/* Microservice that connects */
-	public Mono<BankSavingAccountModel> updateAmountBankAccount(BankSavingAccountModel bankSavingAccountModel, String accountNumber,
-			String typeOperation, Double accountNumberAmount) {
+	public Mono<BankSavingAccountModel> updateAmountRetire(BankSavingAccountModel bankSavingAccountModel) {
 		return client.put()
-				.uri("/update-amount/" + accountNumber + "/" + typeOperation + "/" + accountNumberAmount)
+				.uri("/update-retire")
 				.accept(MediaType.APPLICATION_JSON_UTF8)
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.syncBody(bankSavingAccountModel)
 				.retrieve()
-				.bodyToMono(BankSavingAccountModel.class);
+				.bodyToMono(BankSavingAccountModel.class)
+				.switchIfEmpty(Mono.empty());
+		
+	}
+	
+	
+	/* Microservice that connects */
+	public Mono<BankSavingAccountModel> updateAmountDeposite(BankSavingAccountModel bankSavingAccountModela) {
+		return client.put()
+				.uri("/update-deposite/")
+				.accept(MediaType.APPLICATION_JSON_UTF8)
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.syncBody(bankSavingAccountModel)
+				.retrieve()
+				.bodyToMono(BankSavingAccountModel.class)
+				.switchIfEmpty(Mono.empty());
 	}
 	
 }

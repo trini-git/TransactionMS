@@ -6,6 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface TransactionServiceInterface {
 	
-	Mono<TransactionModel> insertTransaction (TransactionModel transactionModel, String accountNumber, String typeOperation, Double amount);
-
+	Mono<TransactionModel> insertTransaction (TransactionModel transactionModel);
 }
