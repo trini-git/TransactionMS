@@ -62,8 +62,7 @@ public class TransactionService implements TransactionServiceInterface {
 				.switchIfEmpty(Mono.empty());
 		
 	}
-	
-	
+		
 	/* Microservice that connects */
 	public Mono<BankSavingAccountModel> updateAmountDeposite(BankSavingAccountModel bankSavingAccountModela) {
 		return client.put()

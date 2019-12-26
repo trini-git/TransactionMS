@@ -10,6 +10,7 @@ public class WebClientConfig {
 	@Bean
 	public WebClient registerWebClient() {
 		return WebClient.create("http://localhost:8004/bank-saving-account");
+		//return WebClient.create("http://localhost:8010/fix-term-vip");
 		
 	}
 }
